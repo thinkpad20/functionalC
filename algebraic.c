@@ -12,16 +12,18 @@ data BillingInfo = CreditCard CardNumber CardHolder Address
 Possible implementation in C:
 */
 
-typedef struct BillingInfo_ {
+typedef struct BillingInfo BillingInfo; 
+struct BillingInfo {
 	enum { CreditCard_t, CashOnDelivery_t, Invoice_t } t;
 	union {
 		struct { int CardNumber; char *CardHolder; char *Address; } CreditCard;
-		struct {} CashOnDelivery;
+		/*struct {} CashOnDelivery; Empty type here for consistency */
 		struct { char *CustomerID; } Invoice;
 	} data;
-} BillingInfo;
+};
 
-BillingInfo CreditCard(int CardNumber, char *CardHolder, char *Address) {
+BillingInfo 
+CreditCard(int CardNumber, char *CardHolder, char *Address) {
 	BillingInfo bi;
 	bi.t = CreditCard_t;
 	bi.data.CreditCard.CardNumber = CardNumber;
@@ -30,13 +32,15 @@ BillingInfo CreditCard(int CardNumber, char *CardHolder, char *Address) {
 	return bi;
 }
 
-BillingInfo CashOnDelivery(void) {
+BillingInfo 
+CashOnDelivery(void) {
 	BillingInfo bi;
 	bi.t = CashOnDelivery_t;
 	return bi;
 }
 
-BillingInfo Invoice(char *CustomerID) {
+BillingInfo 
+Invoice(char *CustomerID) {
 	BillingInfo bi;
 	bi.t = Invoice_t;
 	bi.data.Invoice.CustomerID = CustomerID;
@@ -50,21 +54,24 @@ data Maybe a = Nothing
              | Just a
 
 */
-typedef struct Maybe_ {
+typedef struct Maybe Maybe;
+struct Maybe {
 	enum { Nothing_t, Just_t } t;
 	union {
-		struct {} Nothing;
+		/* struct {} Nothing; Empty type here for consistency */
 		struct { void *a; } Just;
 	} data;
-} Maybe;
+};
 
-Maybe Nothing(void) {
+Maybe 
+Nothing(void) {
 	Maybe m;
 	m.t = Nothing_t;
 	return m;
 }
 
-Maybe Just(void *a) {
+Maybe 
+Just(void *a) {
 	Maybe m;
 	m.t = Just_t;
 	m.data.Just.a = a;

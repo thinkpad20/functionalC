@@ -3,19 +3,15 @@
 #include <unistd.h>
 #include "list.h"
 
-typedef struct closure closure;
-
-struct closure {
+typedef struct closure {
   void *(*fn)(list *);
   list *env;
-};
+} closure;
 
-typedef struct envobj envobj;
-
-struct envobj {
+typedef struct envobj {
   void *val;
   ssize_t size;
-};
+} envobj;
 
 envobj *envitem(void *var, ssize_t s);
 void *unbox(list *l); 

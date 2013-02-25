@@ -6,13 +6,9 @@
 
 list *
 newitem(void *v) {
-  list *o = malloc(sizeof(list));
-  if (o == NULL) {
-    exit(1);
-  }
+  list *o = gc_malloc(sizeof(list), LIST);
   o->val = v;
   o->next = NULL;
-  gc_register((void *)o, LIST);
   return o;
 }
 
@@ -49,7 +45,7 @@ concat(list *h, list *t) {
 	return h;	
 }
 
-//shallow copy
+/* shallow copy */
 list *
 copy(list *l) {
   list *o = NULL;
@@ -60,7 +56,7 @@ copy(list *l) {
   return o; 
 }
 
-//objs flag set to true will also free the objects in the list
+/* objs flag set to true will also free the objects in the list */
 void
 list_free(void *_l) {
   list *l = _l;

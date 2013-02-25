@@ -1,29 +1,26 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include "gc.h"
 #include "closure.h"
 #include "list.h"
 
-typedef struct ref ref;
-struct ref {
-  void *ptr; //pointer to the obj 
-  TYPE type; //obj type
-  ref *next; //refs are stored as a list;
-};
+typedef struct ref_ {
+  void *ptr; /* pointer to the obj */
+  TYPE type; /* obj type */
+  struct ref_ *next; /* refs are stored as a list; */
+} ref;
 
-typedef struct gc gc;
-struct gc {
-  ref *marked;   //these will not be freed unless unmarked
+typedef struct gc {
+  ref *marked;   /* these will not be freed unless unmarked */
   ref *last_marked;
-  ref *unmarked; //these will be freed when gc_collect is called 
-  ref *last_unmarked; //we want append to be O(1)
+  ref *unmarked; /* these will be freed when gc_collect is called */
+  ref *last_unmarked; /* we want append to be O(1) */
   void (*destructor_table[TYPE_COUNT])(void *);
-};
+} gc;
 
-//this IS the garbage collector
+/* this IS the garbage collector */
 static gc _gc;
 
-//private functions
+/* private functions */
 void gc_register_destructor(TYPE, void (*)(void *));
 ref *refitem(void *, TYPE);
 void append_unmarked(ref *unmarked);
@@ -137,17 +134,17 @@ standard_free(void *ptr) {
   free(ptr);
 }
 
-//public functions
+/* public functions */
 void
 gc_init(void) {
-  //register destructors here
-  //all of these are basically just standard free
-  //just showing that one could register other destructors
+  /* register destructors here */
+  /* all of these are basically just standard free */
+  /* just showing that one could register other destructors */
   gc_register_destructor(ENVOBJ, envobj_free);
   gc_register_destructor(CLOSURE, closure_free);
   gc_register_destructor(LIST, list_free);
   gc_register_destructor(STANDARD, standard_free); 
-  //don't change these
+  /* don't change these */
   _gc.marked = NULL;
   _gc.unmarked = NULL;
   _gc.last_unmarked = NULL;
@@ -178,11 +175,21 @@ gc_unmark(void *obj) {
   append_unmarked(r);
 }
 
-//don't register objs twice; boy that could go poorly
+/* don't register objs twice; boy that could go poorly */
 void
 gc_register(void *obj, TYPE type) {
   ref *n = refitem(obj, type);
   append_unmarked(n); 
+}
+
+void *
+gc_malloc(size_t size, TYPE type) {
+  void *ptr = malloc(size);
+  if (ptr == NULL) {
+    exit(1);
+  }
+  gc_register(ptr, type);
+  return ptr;
 }
 
 void
@@ -197,8 +204,8 @@ gc_collect(void) {
   _gc.unmarked = NULL;
 }
 
-//displays everything inside the garbage collector
-//for debugging purposes
+/* displays everything inside the garbage collector
+for debugging purposes */
 void
 gc_print(void) {
   ref *curr;

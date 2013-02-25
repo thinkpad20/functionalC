@@ -1,6 +1,6 @@
 SRCS = $(shell ls *.c)
 OBJS = $(SRCS:.c=.o)
-CFLAGS = -std=c99 -Wall
+CFLAGS = -Wall -pedantic
 
 test: $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) -o $@

@@ -4,7 +4,7 @@
 #include "functional.h"
 #include "closure.h"
 
-//some standard functional programming functions
+/* some standard functional programming functions */
 void
 iter(list *l, void (*fn)(void *, void *), void *args) {
   list *curr;
@@ -45,7 +45,7 @@ filter(list *l, bool (*fn)(void *, void *), void *args) {
   return o;
 }
 
-//not lazy
+/* not lazy */
 list *
 range(int start, int end) {
   list *o = NULL;
@@ -56,5 +56,3 @@ range(int start, int end) {
   }
   return o;
 }
-
-

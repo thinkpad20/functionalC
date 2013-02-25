@@ -6,7 +6,7 @@
 void iter(list *l, void (*fn)(void *, void *), void *args); 
 
 list *map(list *l, void *(*fn)(void *, void *), void *args); 
-//map for lifted types
+/* map for lifted types */
 list *lmap(list *l, closure *cl); 
 
 list *filter(list *l, bool (*fn)(void *, void *), void *args); 
