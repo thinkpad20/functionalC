@@ -54,7 +54,7 @@ Invoice(char *CustomerID) {
 
 ```
 
-As we can see, this is both verbose, and . Furthermore, it's not safe - although the enum, if queried, will tell us the type of of BillingInfo we're dealing with, we cannot guarantee that it's being used properly, and it is subject to arbitrary change. A much cleaner syntax would mirror that of Haskell:
+As we can see, this is verbose and hides the simple idea that the data structure is supposed to convey - that it can be one of a few things. Furthermore, this structure is not safe - although the enum, if queried, will tell us the type of of BillingInfo we're dealing with, we cannot guarantee that it's being used properly, and it is subject to arbitrary change. A much cleaner syntax would mirror that of Haskell:
 
 ```
 data BillingInfo {
@@ -268,7 +268,7 @@ auto last(list l) {
 }
 ```
 
-A few things I've introduced here. For one, we've defined some operator overloaders; the syntax for this will be op(symbol)(params). Binary vs unary operators can be inferred from the parameters given. To be clear, the : symbol indicates "such that." Note that we're using the `.a` and `a..` syntax from above (and defined in the operator overloader functions). If that's confusing (or simply to keep it more C-like), we could use a struct-dereference style call. Also note that we have to inform our compiler that when evaluating a list as a boolean, we return true if in the C-version, `a->t != empty_t`. Realizing this is a valuable thing, I defined an op(asBool) function above. Alternatively we could use something like `match(a.cons)` or `match (a.empty)`, which would tell us which constructor was used to build `a`. This would probably be what we want in a data type with more than two possibilities. Either way, we have some pattern matching -- this may be somewhat primitive compared to what Haskell is doing, but it seems to work. Let's try a possible conversion of the above functions to C code. We'll skip over some of the operator overloaders and renaming the other two -- in a "real" compiled-to-C version, these would probably be given generic (and ugly) names.
+A few things I've introduced here. For one, we've defined some operator overloaders; the syntax for this will be op(symbol)(params). Binary vs unary operators can be inferred from the parameters given. To be clear, the : symbol indicates "such that." Note that we're using the `.a` and `a..` syntax from above (and defined in the operator overloader functions). If that's confusing (or simply to keep it more C-like), we could use a struct-dereference style call. Also note that we have to inform our compiler that when evaluating a list as a boolean, we return true if in the C-version, `a->t != empty_t`. Realizing this is a valuable thing, I defined an op(asBool) function above. Alternatively we could use something like `match(a.cons)` or `match (a.empty)`, which would tell us which constructor was used to build `a`. This would probably be what we want in a data type with more than two possibilities. Either way, we have some pattern matching -- this may be somewhat primitive compared to what Haskell is doing, but it seems to work. Let's try a possible conversion of the above functions to C code. We'll skip over some of the operator overloaders and rename the other two to something readable -- in a "real" compiled-to-C version, these would probably be given generic (and ugly) names.
 
 ```c
 typedef List* list;
