@@ -236,13 +236,12 @@ bool op(asBool)(list a) {
 	match(a.cons) => true
 }
 
-auto op(.)(list a) {
-	match(a) => a.head // head and tail are defined by the names of the arguments to the cons constructor
-}
+// head and tail are defined by the names of the arguments to the cons constructor
+auto op(.)(list a)
+	match(a) => a.head
 
-auto op(..)(list a) {
+auto op(..)(list a)
 	match(a) => a.tail
-}
 
 list op([])(auto a)
 	cons(a, empty())
@@ -317,4 +316,4 @@ void *last(list l) {
 }
 ```
 
-Note that our simplistic "exceptions" are thrown whenever we fail to satisfy any of the possible matches. Also note that the functional C code is 28 lines, while the ANSI C is 42 lines, and considerably less readable. The difference is quite a bit more pronounced when the definition and constructors of the List data type are also included.
+Note that our simplistic "exceptions" are thrown whenever we fail to satisfy any of the possible matches. Also note that the functional C code for head, tail, init and last is 15 lines, while the ANSI C for the same functions is double that, and considerably less readable. The difference is quite a bit more pronounced when the definition and constructors of the List data type are also included.
