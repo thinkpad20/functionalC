@@ -56,13 +56,15 @@ Invoice(char *CustomerID) {
 
 As we can see, this is both verbose, and . Furthermore, it's not safe - although the enum, if queried, will tell us the type of of BillingInfo we're dealing with, we cannot guarantee that it's being used properly, and it is subject to arbitrary change. A much cleaner syntax would mirror that of Haskell:
 
+```
 data BillingInfo {
 	CreditCard(String cardNumber, String cardHolder, String address)
 	CashOnDelivery()
 	Invoice(String customerID)
 }
+```
 
-Isn't that much better? In a functional C language, the above representation would be a concise way to tell the compiler to generate objects as we had seen above (along, possibly, with some additional functions which we might use for pattern matching, "deriving", etc). Note that we're tentatively getting rid of semicolons for as clean an interface as possible. This may be changed if it complicates parsing.
+Isn't that much better? In a functional C language, the above representation would be a concise way to tell the compiler to generate objects as we had seen above (along, possibly, with some additional functions which we might use for pattern matching, "deriving", etc). Note that we're tentatively getting rid of semicolons for as clean an interface as possible. This may be changed if it complicates parsing. Also note that if we want to keep this language a strict superset of C, then we might want to write `data` as `@data` or some other way to guarantee there won't be name conflicts. If only for aesthetic purposes, however, I'll keep it this way for now.
 
 Another useful feature to be found in a language like Haskell is case-based function declarations. Take the following definition of the sum of a list in Haskell:
 
@@ -158,11 +160,11 @@ auto sumList(list l) {
 Now we're really looking quite different! Let's restate our list examples with the clean syntax:
 
 ```
-list l                // note that list is intrinsically parametric, so not declaring a type simply means it will be inferred later.
-boolean isEmpty = !l  // isEmpty is true
-l = [1, 3, 5, 7]      // At this point, the type of l has been recorded and cannot be changed.
-int a = .l            // a == 1
-auto l2 = l..         // l2 == {3, 5, 7}. "list l2 = l.." would also be valid.
+list a                // note that list is intrinsically parametric, so not declaring a type simply means it will be inferred later.
+boolean isEmpty = !a  // isEmpty is true
+a = [1, 3, 5, 7]      // At this point, the type of a has been recorded and cannot be changed.
+int i = .a            // i == 1
+auto b = a..          // b == {3, 5, 7}. "list b = a.." would also be valid.
 ```
 
 Let's imagine how this would look given an algebraic-type definition of a list. In Haskell, a list is defined as:
@@ -229,32 +231,45 @@ data list!auto {
 	cons(auto head, list!auto tail)
 }
 
+bool op(asBool)(list a) {
+	match(a.empty) => false
+	match(a.cons) => true
+}
+
+auto op(.)(list a) {
+	match(a) => a.head // head and tail are defined by the names of the arguments to the cons constructor
+}
+
+auto op(..)(list a) {
+	match(a) => a.tail
+}
+
 list op([])(auto a)
 	cons(a, empty())
 
 list op(++)(list a, list b) {
-	match(a.empty) => b
-	match(a.cons) => cons(a.head, a.tail ++ b)
+	match(!a) => b
+	match(a) => cons(.a, a.. ++ b)
 }
 
-auto head(list l)
-	match(l.cons) => l.head
+auto head(list a)
+	match(a) => .a
 
-list tail(list l)
-	match(l.cons) => l.tail
+list tail(list a)
+	match(a) => a..
 
-list init(list l) {
-	match(cons : !cons.tail) => empty()
-	match(l.cons) => [l.head] ~ init(l.tail)
+list init(list a) {
+	match(a : !a..) => empty()
+	match(a) => [.a] ~ init(a..)
 }
 
 auto last(list l) {
-	match(l.cons : !cons.tail) => l.head
-	match(l.cons) => last(l.tail)
+	match(a : !a..) => .a
+	match(a) => last(a..)
 }
 ```
 
-A few things I've introduced here. For one, we've defined two operator overloaders; the syntax for this will be op(symbol)(params). Binary vs unary operators can be inferred from the parameters given. To be clear, the : symbol indicates "such that." The .cons and .empty values are equivalent to testing the type of the data and are used for pattern matching -- this may be somewhat primitive compared to what Haskell is doing, but it seems to work. Let's try a possible conversion of the above functions to C code.
+A few things I've introduced here. For one, we've defined some operator overloaders; the syntax for this will be op(symbol)(params). Binary vs unary operators can be inferred from the parameters given. To be clear, the : symbol indicates "such that." Note that we're using the `.a` and `a..` syntax from above (and defined in the operator overloader functions). If that's confusing (or simply to keep it more C-like), we could use a struct-dereference style call. Also note that we have to inform our compiler that when evaluating a list as a boolean, we return true if in the C-version, `a->t != empty_t`. Realizing this is a valuable thing, I defined an op(asBool) function above. Alternatively we could use something like `match(a.cons)` or `match (a.empty)`, which would tell us which constructor was used to build `a`. This would probably be what we want in a data type with more than two possibilities. Either way, we have some pattern matching -- this may be somewhat primitive compared to what Haskell is doing, but it seems to work. Let's try a possible conversion of the above functions to C code. We'll skip over some of the operator overloaders and renaming the other two -- in a "real" compiled-to-C version, these would probably be given generic (and ugly) names.
 
 ```c
 typedef List* list;
