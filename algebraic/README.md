@@ -316,4 +316,7 @@ void *last(list l) {
 }
 ```
 
-Note that our simplistic "exceptions" are thrown whenever we fail to satisfy any of the possible matches. Also note that the functional C code for head, tail, init and last is 15 lines, while the ANSI C for the same functions is double that, and considerably less readable. The difference is quite a bit more pronounced when the definition and constructors of the List data type are also included.
+Note that our simplistic "exceptions" are thrown whenever we fail to satisfy any of the possible matches. This might be made more robust later. Also note that the functional C code for head, tail, init and last is 15 lines, while the ANSI C for the same functions is double that, and considerably less readable. The difference is quite a bit more pronounced when the definition and constructors of the List data type are also included.
+
+
+Currying: I need to think about this more, but as I understand it, currying is defining a function by specifying one or more arguments ahead of time.

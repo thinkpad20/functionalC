@@ -1,0 +1,54 @@
+One of the most advantageous aspects of Haskell are its algebraic types, especially when combined with its potent pattern-matching capabilities. In sketching out the ways in which C could be extended to adopt the functional paradigm, natively incorporating these along with other features of Haskell is an appealing prospect. Let's examine how we might do this.
+
+Here's an example of an algebraic data type in Haskell (from Real World Haskell chapter 3):
+
+data BillingInfo = CreditCard CardNumber CardHolder Address
+                 | CashOnDelivery
+                 | Invoice CustomerID
+
+Here's an implementation of the same idea in C:
+
+typedef struct BillingInfo BillingInfo; 
+struct BillingInfo {
+	enum { CreditCard_t, CashOnDelivery_t, Invoice_t } t;
+	union {
+		struct { int CardNumber; char *CardHolder; char *Address; } CreditCard;
+		/* note that we don't need a struct to hold CashOnDelivery */
+		struct { char *CustomerID; } Invoice;
+	} data;
+};
+
+BillingInfo 
+CreditCard(int CardNumber, char *CardHolder, char *Address) {
+	BillingInfo bi;
+	bi.t = CreditCard_t;
+	bi.data.CreditCard.CardNumber = CardNumber;
+	bi.data.CreditCard.CardHolder = CardHolder;
+	bi.data.CreditCard.Address = Address;
+	return bi;
+}
+
+BillingInfo 
+CashOnDelivery(void) {
+	BillingInfo bi;
+	bi.t = CashOnDelivery_t;
+	return bi;
+}
+
+BillingInfo 
+Invoice(char *CustomerID) {
+	BillingInfo bi;
+	bi.t = Invoice_t;
+	bi.data.Invoice.CustomerID = CustomerID;
+	return bi;
+}
+
+As we can see, this is both verbose, and . Furthermore, it's not safe - although the enum, if queried, will tell us the type of of BillingInfo we're dealing with, we cannot guarantee that it's being used properly, and it is subject to arbitrary change. A much cleaner syntax would mirror that of Haskell:
+
+data BillingInfo {
+	CreditCard(String cardNumber, String cardHolder, String address)
+	CashOnDelivery()
+	Invoice(String customerID)
+}
+
+Isn't that much better? In a functional C language, the above representation would be a concise way to tell the compiler to generate objects as we had seen above (along, possibly, with some additional functions which we might use for pattern matching, "deriving", etc). Note that we're tentatively getting rid of semicolons for as clean an interface as possible. This may be changed if it complicates parsing.

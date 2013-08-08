@@ -12,6 +12,8 @@ data BillingInfo = CreditCard CardNumber CardHolder Address
 Possible implementation in C:
 */
 
+#include <stdlib.h>
+
 typedef struct BillingInfo BillingInfo; 
 struct BillingInfo {
 	enum { CreditCard_t, CashOnDelivery_t, Invoice_t } t;
@@ -76,4 +78,37 @@ Just(void *a) {
 	m.t = Just_t;
 	m.data.Just.a = a;
 	return m;
+}
+
+/*
+And another for a list type:
+
+data List a = Empty | Cons a (List a)
+*/
+
+typedef
+struct List_ {
+	enum {Empty_t, Cons_t} t; 
+	union {
+		struct { void *a; struct List_ *next; } Cons;
+	} data;
+}
+List;
+
+List *
+Empty(void) {
+	List *l = malloc(sizeof(List));
+	if (!l) exit(1);
+	l->t = Empty_t;
+	return l;
+}
+
+List *
+Cons(void *a, List *next) {
+	List *l = malloc(sizeof(List));
+	if (!l) exit(1);
+	l->t = Cons_t;
+	l->data.Cons.a = a;
+	l->data.Cons.next = next;
+	return l;
 }
